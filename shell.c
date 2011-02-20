@@ -9,7 +9,7 @@
 #define PROMPT  "% "
 #define DELIMS  " \t\n"
 
-int cmd_pwd(int argc, char const *const *argv)
+static int cmd_pwd(int argc, char const *const *argv)
 {
 	char *p = getcwd(NULL, 0);
 	puts(p);
@@ -17,7 +17,7 @@ int cmd_pwd(int argc, char const *const *argv)
 	return 0;
 }
 
-int cmd_cd(int argc, char const *const *argv)
+static int cmd_cd(int argc, char const *const *argv)
 {
 	char const *n = NULL;
 	if (argc < 2) {
@@ -39,13 +39,13 @@ int cmd_cd(int argc, char const *const *argv)
 	return -1;
 }
 
-int cmd_exit(int argc, char const *const *argv)
+static int cmd_exit(int argc, char const *const *argv)
 {
 	printf("built-in: exit\n");
 	return 0;
 }
 
-int cmd_default(int argc, char const *const *argv)
+static int cmd_default(int argc, char const *const *argv)
 {
 	printf("built-in: !!NO!!\n");
 	return 0;
@@ -64,7 +64,7 @@ static const builtin_t builtins[] = {
 	{ NULL,   cmd_default }
 };
 
-command_t *builtin_get(builtin_t const *dict, char const *name)
+static command_t *builtin_get(builtin_t const *dict, char const *name)
 {
 	while (dict->name != NULL) {
 		if (!strcmp(dict->name, name))
@@ -74,7 +74,7 @@ command_t *builtin_get(builtin_t const *dict, char const *name)
 	return dict->func;
 }
 
-int strempty(char const *str) {
+static int strempty(char const *str) {
 	while (*str != '\0') {
 		if (*str != ' ' && *str != '\n')
 			return 0;
