@@ -36,7 +36,6 @@ int cmd_cd(int argc, char **argv)
 	fprintf(stderr, "error changing directory to \"%s\": %s\n", n,
 			strerror(errno));
 
-	printf("built-in: cd\n");
 	return -1;
 }
 
