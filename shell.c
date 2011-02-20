@@ -7,7 +7,7 @@
 #define ARGNUM  16
 #define BUFSIZE 1024
 #define PROMPT  "% "
-#define DELIMS  " \n"
+#define DELIMS  " \t\n"
 
 int cmd_pwd(int argc, char **argv)
 {
@@ -33,8 +33,8 @@ int cmd_cd(int argc, char **argv)
 	if (!x)
 		return 0;
 
-	fprintf(stderr, "error changing directory to \"%s\": %s\n", n,
-			strerror(errno));
+	fprintf(stderr, "%s: %s: %s\n", argv[0],
+			strerror(errno), n);
 
 	return -1;
 }
@@ -74,9 +74,10 @@ command_t builtin_get(builtin_t *dict, char *name)
 	return dict->func;
 }
 
-int strempty(char *str) {
+int strempty(const char *str) {
 	while (*str != '\0') {
-		if (*str != ' ' && *str != '\n') return 0;
+		if (*str != ' ' && *str != '\n')
+			return 0;
 		str++;
 	}
 	return 1;
@@ -96,9 +97,8 @@ int main(int argc, char **argv)
 		if (fgets(line, BUFSIZE, stdin) == NULL) {
 			printf("\n");
 			return 0;
-		}
-		/* Ignore empty lines. */
-		else if (strempty(line)) {
+		} else if (strempty(line)) {
+			/* Ignore empty lines. */
 			continue;
 		}
 
