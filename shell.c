@@ -53,18 +53,18 @@ int cmd_default(int argc, char **argv)
 
 typedef int (*command_t)(int argc, char **argv);
 typedef struct builtin_s {
-	char     *name;
+	char const *name;
 	command_t func;
 } builtin_t;
 
-static builtin_t builtins[] = {
+static const  builtin_t builtins[] = {
 	{ "exit", cmd_exit    },
 	{ "cd",   cmd_cd      },
 	{ "pwd",  cmd_pwd     },
 	{ NULL,   cmd_default }
 };
 
-command_t builtin_get(builtin_t *dict, char *name)
+command_t builtin_get(const builtin_t *dict, char *name)
 {
 	while (dict->name != NULL) {
 		if (!strcmp(dict->name, name))
