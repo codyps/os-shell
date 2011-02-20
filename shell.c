@@ -1,16 +1,43 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define ARGNUM  16
 #define BUFSIZE 1024
 #define PROMPT  "% "
 #define DELIMS  " \n"
 
+int cmd_pwd(int argc, char **argv)
+{
+	char *p = getcwd(NULL, 0);
+	puts(p);
+	free(p);
+	return 0;
+}
+
 int cmd_cd(int argc, char **argv)
 {
+	char *n = NULL;
+	if (argc < 2) {
+		n = getenv("HOME");
+		if (!n)
+			n = "/";
+	} else {
+		n = argv[1];
+	}
+
+	int x = chdir(n);
+
+	if (!x)
+		return 0;
+
+	fprintf(stderr, "error changing directory to \"%s\": %s\n", n,
+			strerror(errno));
+
 	printf("built-in: cd\n");
-	return 0;
+	return -1;
 }
 
 int cmd_exit(int argc, char **argv)
@@ -32,8 +59,9 @@ typedef struct builtin_s {
 } builtin_t;
 
 static builtin_t builtins[] = {
-	{ "cd",   cmd_cd      },
 	{ "exit", cmd_exit    },
+	{ "cd",   cmd_cd      },
+	{ "pwd",  cmd_pwd     },
 	{ NULL,   cmd_default }
 };
 
