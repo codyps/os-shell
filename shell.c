@@ -5,7 +5,7 @@
 #define ARGNUM  16
 #define BUFSIZE 1024
 #define PROMPT  "% "
-#define DELIMS  " "
+#define DELIMS  " \n"
 
 int cmd_cd(int argc, char **argv)
 {
@@ -40,7 +40,8 @@ static builtin_t builtins[] = {
 command_t builtin_get(builtin_t *dict, char *name)
 {
 	while (dict->name != NULL) {
-		if (!strcmp(dict->name, name)) break;
+		if (!strcmp(dict->name, name))
+			break;
 		++dict;
 	}
 	return dict->func;
