@@ -9,7 +9,7 @@
 #define PROMPT  "% "
 #define DELIMS  " \t\n"
 
-int cmd_pwd(int argc, char **argv)
+int cmd_pwd(int argc, char const *const *argv)
 {
 	char *p = getcwd(NULL, 0);
 	puts(p);
@@ -17,9 +17,9 @@ int cmd_pwd(int argc, char **argv)
 	return 0;
 }
 
-int cmd_cd(int argc, char **argv)
+int cmd_cd(int argc, char const *const *argv)
 {
-	char *n = NULL;
+	char const *n = NULL;
 	if (argc < 2) {
 		n = getenv("HOME");
 		if (!n)
@@ -39,32 +39,32 @@ int cmd_cd(int argc, char **argv)
 	return -1;
 }
 
-int cmd_exit(int argc, char **argv)
+int cmd_exit(int argc, char const *const *argv)
 {
 	printf("built-in: exit\n");
 	return 0;
 }
 
-int cmd_default(int argc, char **argv)
+int cmd_default(int argc, char const *const *argv)
 {
 	printf("built-in: !!NO!!\n");
 	return 0;
 }
 
-typedef int (*command_t)(int argc, char **argv);
+typedef int (command_t)(int argc, char const *const *argv);
 typedef struct builtin_s {
 	char const *name;
-	command_t func;
+	command_t  *func;
 } builtin_t;
 
-static const  builtin_t builtins[] = {
+static const builtin_t builtins[] = {
 	{ "exit", cmd_exit    },
 	{ "cd",   cmd_cd      },
 	{ "pwd",  cmd_pwd     },
 	{ NULL,   cmd_default }
 };
 
-command_t builtin_get(const builtin_t *dict, char *name)
+command_t *builtin_get(builtin_t const *dict, char const *name)
 {
 	while (dict->name != NULL) {
 		if (!strcmp(dict->name, name))
@@ -74,7 +74,7 @@ command_t builtin_get(const builtin_t *dict, char *name)
 	return dict->func;
 }
 
-int strempty(const char *str) {
+int strempty(char const *str) {
 	while (*str != '\0') {
 		if (*str != ' ' && *str != '\n')
 			return 0;
@@ -118,6 +118,11 @@ int main(int argc, char **argv)
 		}
 
 		/* Check if the command is a shell built-in. */
-		builtin_get(builtins, tok_val[0])(tok_num, tok_val);
+		command_t *func = builtin_get(builtins, tok_val[0]);
+
+		char *const *tmp1       = tok_val;
+		char const *const *tmp2 = tmp1;
+
+		func(tok_num, tmp2);
 	}
 }
