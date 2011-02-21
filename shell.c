@@ -4,12 +4,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/wait.h>
+
+
 #define ARGNUM  16
 #define BUFSIZE 1024
 #define PROMPT  "% "
 #define DELIMS  " \t\n"
 
-static int cmd_pwd(int argc, char const *const *argv)
+static int cmd_pwd(int argc, char *const *argv)
 {
 	char *p = getcwd(NULL, 0);
 	puts(p);
@@ -17,7 +23,7 @@ static int cmd_pwd(int argc, char const *const *argv)
 	return 0;
 }
 
-static int cmd_cd(int argc, char const *const *argv)
+static int cmd_cd(int argc, char *const *argv)
 {
 	char const *n = NULL;
 	if (argc < 2) {
@@ -39,19 +45,32 @@ static int cmd_cd(int argc, char const *const *argv)
 	return -1;
 }
 
-static int cmd_exit(int argc, char const *const *argv)
+static int cmd_exit(int argc, char *const *argv)
 {
 	printf("built-in: exit\n");
 	return 0;
 }
 
-static int cmd_default(int argc, char const *const *argv)
+static int cmd_default(int argc, char *const *argv)
 {
-	printf("built-in: !!NO!!\n");
+	pid_t p = fork();
+	if (p == 0) {
+		/* child */
+		int x = execvp(argv[0], argv);
+		if (x) {
+			fprintf(stderr, "execvp fail.");
+			return -1;
+		}
+	} else {
+		int status;
+		pid_t p2 = wait4(p, &status, 1, NULL);
+		printf("wait done. %d\n", p2);
+	}
+
 	return 0;
 }
 
-typedef int (command_t)(int argc, char const *const *argv);
+typedef int (command_t)(int argc, char *const *argv);
 typedef struct builtin_s {
 	char const *name;
 	command_t  *func;
@@ -86,12 +105,15 @@ static int strempty(char const *str) {
 int main(int argc, char **argv)
 {
 	char line[BUFSIZE];
-	char *tok_val[ARGNUM];
+
+	/* extra space for NULL */
+	char *tok_val[ARGNUM + 1];
 	int   tok_num = 0;
 
 	for (;;) {
 		char *tok;
 
+next_command:
 		/* Prompt the user and wait for input. */
 		printf("%s", PROMPT);
 		if (fgets(line, BUFSIZE, stdin) == NULL) {
@@ -109,7 +131,7 @@ int main(int argc, char **argv)
 			/* Don't overflow the static-sized buffer. */
 			if (tok_num >= ARGNUM) {
 				fprintf(stderr, "err: too many arguments\n");
-				return 1;
+				goto next_command;
 			}
 
 			tok_val[tok_num] = tok;
@@ -117,12 +139,13 @@ int main(int argc, char **argv)
 			tok_num++;
 		}
 
+		/* make execvp happy. */
+		tok_val[tok_num] = NULL;
+
 		/* Check if the command is a shell built-in. */
 		command_t *func = builtin_get(builtins, tok_val[0]);
 
 		char *const *tmp1       = tok_val;
-		char const *const *tmp2 = tmp1;
-
-		func(tok_num, tmp2);
+		func(tok_num, tmp1);
 	}
 }
