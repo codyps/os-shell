@@ -1,3 +1,7 @@
+/* 198:416 - Assignment 2 - Shell
+ * Authors: Cody Schafer, Michael Koval
+ */
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,7 +12,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/wait.h>
-
 
 #define ARGNUM  16
 #define BUFSIZE 1024
