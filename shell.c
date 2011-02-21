@@ -29,6 +29,7 @@ static int cmd_pwd(int argc, char *const *argv)
 static int cmd_cd(int argc, char *const *argv)
 {
 	char const *n = NULL;
+	int x;
 	if (argc < 2) {
 		n = getenv("HOME");
 		if (!n)
@@ -36,8 +37,7 @@ static int cmd_cd(int argc, char *const *argv)
 	} else {
 		n = argv[1];
 	}
-
-	int x = chdir(n);
+	x = chdir(n);
 
 	if (!x)
 		return 0;
@@ -67,7 +67,7 @@ static int cmd_default(int argc, char *const *argv)
 	} else {
 		int status;
 		pid_t p2 = wait4(p, &status, 1, NULL);
-		printf("wait done. %d\n", p2);
+		printf("wait done. %d\n", (int)p2);
 	}
 
 	return 0;
@@ -146,9 +146,11 @@ next_command:
 		tok_val[tok_num] = NULL;
 
 		/* Check if the command is a shell built-in. */
-		command_t *func = builtin_get(builtins, tok_val[0]);
+		{
+			command_t *func = builtin_get(builtins, tok_val[0]);
 
-		char *const *tmp1       = tok_val;
-		func(tok_num, tmp1);
+			char *const *tmp1 = tok_val;
+			func(tok_num, tmp1);
+		}
 	}
 }

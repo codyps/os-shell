@@ -14,7 +14,8 @@ all: build
 build: $(BIN)
 
 $(BIN): $(BIN).out
-	strip -o $@ $<
+#	strip -o $@ $<
+	mv $< $@
 
 .PHONY: rebuild
 rebuild: | clean
