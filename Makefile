@@ -5,7 +5,7 @@ CC = gcc
 RM = rm -f
 
 CFLAGS = -ggdb
-override CFLAGS+= -Wall -pipe -MMD -std=gnu99
+override CFLAGS+= -Wall -pipe -MMD
 
 .PHONY: all
 all: build
@@ -29,7 +29,8 @@ $(BIN).out: $(SRC)
 
 .PHONY: archive
 VER:=$(shell git rev-parse --verify --short HEAD 2>/dev/null)
+PKG_NAME:=$(BIN)-g$(VER)
 archive:
-	git archive --prefix='rsock-g$(VER)/' HEAD > rsock-g$(VER).tar
+	git archive --prefix='$(PKG_NAME)/' HEAD > $(PKG_NAME).tar
 
 -include $(wildcard *.d)
