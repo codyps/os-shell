@@ -94,15 +94,6 @@ static command_t *builtin_get(builtin_t const *dict, char const *name)
 	return dict->func;
 }
 
-static int strempty(char const *str) {
-	while (*str != '\0') {
-		if (*str != ' ' && *str != '\n')
-			return 0;
-		str++;
-	}
-	return 1;
-}
-
 int main(int argc, char **argv)
 {
 	char line[BUFSIZE];
@@ -120,9 +111,6 @@ next_command:
 		if (fgets(line, BUFSIZE, stdin) == NULL) {
 			printf("\n");
 			return 0;
-		} else if (strempty(line)) {
-			/* Ignore empty lines. */
-			continue;
 		}
 
 		/* Tokenize the line to find command-line parameters. */
@@ -140,9 +128,10 @@ next_command:
 			tok_num++;
 		}
 
-		/* make execvp happy. */
-		tok_val[tok_num] = NULL;
-
-		builtin_get(builtins, tok_val[0])(tok_num, tok_val);
+		/* Lookup commands in the built-in table. Fall back on exec. */
+		if (tok_num > 0) {
+			tok_val[tok_num] = NULL;
+			builtin_get(builtins, tok_val[0])(tok_num, tok_val);
+		}
 	}
 }
