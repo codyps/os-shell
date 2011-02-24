@@ -20,6 +20,12 @@
 #define PROMPT  "% "
 #define TIMEOUT 5
 
+typedef int (command_t)(int argc, char *const *argv);
+typedef struct builtin_s {
+	char const *name;
+	command_t  *func;
+} builtin_t;
+
 static pid_t pid;
 
 static void sig_alarm(int sig)
@@ -108,12 +114,6 @@ static int cmd_default(int argc, char *const *argv)
 	}
 	return 0;
 }
-
-typedef int (command_t)(int argc, char *const *argv);
-typedef struct builtin_s {
-	char const *name;
-	command_t  *func;
-} builtin_t;
 
 static const builtin_t builtins[] = {
 	{ "exit", cmd_exit    },
