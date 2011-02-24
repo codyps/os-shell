@@ -18,14 +18,6 @@
 #define PROMPT  "% "
 #define DELIMS  " \t\n"
 
-static int cmd_pwd(int argc, char *const *argv)
-{
-	char *p = getcwd(NULL, 0);
-	puts(p);
-	free(p);
-	return 0;
-}
-
 static int cmd_cd(int argc, char *const *argv)
 {
 	char const *n = NULL;
@@ -70,7 +62,7 @@ static int cmd_default(int argc, char *const *argv)
 		int x = execvp(argv[0], argv);
 		if (x) {
 			fprintf(stderr, "execvp fail.");
-			return -1;
+			exit(1);
 		}
 	} else {
 		int status;
@@ -90,7 +82,6 @@ typedef struct builtin_s {
 static const builtin_t builtins[] = {
 	{ "exit", cmd_exit    },
 	{ "cd",   cmd_cd      },
-	{ "pwd",  cmd_pwd     },
 	{ NULL,   cmd_default }
 };
 
