@@ -3,6 +3,7 @@
  */
 
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,8 +16,16 @@
 
 #define ARGNUM  16
 #define BUFSIZE 1024
-#define PROMPT  "% "
 #define DELIMS  " \t\n"
+#define PROMPT  "% "
+#define TIMEOUT 5
+
+static pid_t pid;
+
+static void sig_alarm(int sig)
+{
+	kill(pid, SIGKILL);
+}
 
 static int cmd_cd(int argc, char *const *argv)
 {
@@ -34,9 +43,7 @@ static int cmd_cd(int argc, char *const *argv)
 	if (!x)
 		return 0;
 
-	fprintf(stderr, "%s: %s: %s\n", argv[0],
-			strerror(errno), n);
-
+	fprintf(stderr, "%s: %s: %s\n", argv[0], strerror(errno), n);
 	return -1;
 }
 
@@ -56,8 +63,8 @@ static int cmd_exit(int argc, char *const *argv)
 
 static int cmd_default(int argc, char *const *argv)
 {
-	pid_t p = fork();
-	if (p == 0) {
+	pid = fork();
+	if (pid == 0) {
 		/* child */
 		int x = execvp(argv[0], argv);
 		if (x) {
@@ -66,10 +73,38 @@ static int cmd_default(int argc, char *const *argv)
 			exit(1);
 		}
 	} else {
+		struct rusage stats;
 		int status;
-		pid_t p2 = wait4(p, &status, 1, NULL);
-		printf("wait done. %d\n", (int)p2);
-		fflush(stdout);
+
+		/* kill the child when a timeout occurs */
+		signal(SIGALRM, sig_alarm);
+		alarm(TIMEOUT);
+
+		for (;;) {
+			int ret;
+
+			errno = 0;
+			ret   = wait4(pid, &status, 0, &stats);
+
+			/* signal interrupted the wait; try again */
+			if (ret == -1 && errno == EINTR) {
+				continue;
+			} else if (ret == -1) {
+				perror("wait4");
+				return 1;
+			} else {
+				break;
+			}
+		}
+
+		/* TODO: check if proc exited normally */
+		printf("exit status = %d\n", status);
+
+		/* TODO: check if proc recieved a signal */
+		printf("user mode time = %ld.%06ld sec\n",
+		       (long)stats.ru_utime.tv_sec, (long)stats.ru_utime.tv_usec);
+		printf("kernel mode time = %ld.%06ld sec\n",
+		       (long)stats.ru_stime.tv_sec, (long)stats.ru_stime.tv_usec);
 	}
 	return 0;
 }
