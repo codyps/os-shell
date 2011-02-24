@@ -62,12 +62,14 @@ static int cmd_default(int argc, char *const *argv)
 		int x = execvp(argv[0], argv);
 		if (x) {
 			fprintf(stderr, "execvp fail.");
+			fflush(stderr);
 			exit(1);
 		}
 	} else {
 		int status;
 		pid_t p2 = wait4(p, &status, 1, NULL);
 		printf("wait done. %d\n", (int)p2);
+		fflush(stdout);
 	}
 	return 0;
 }
