@@ -50,7 +50,15 @@ static int cmd_cd(int argc, char *const *argv)
 
 static int cmd_exit(int argc, char *const *argv)
 {
-	printf("built-in: exit\n");
+	if (argc < 2) {
+		exit(0);
+	} else {
+		int ret = 0;
+		sscanf(argv[1], "%d", &ret);
+
+		/* if sscanf fails, we exit with 0 */
+		exit(ret);
+	}
 	return 0;
 }
 
