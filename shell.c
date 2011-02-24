@@ -69,7 +69,6 @@ static int cmd_default(int argc, char *const *argv)
 		pid_t p2 = wait4(p, &status, 1, NULL);
 		printf("wait done. %d\n", (int)p2);
 	}
-
 	return 0;
 }
 
@@ -144,12 +143,6 @@ next_command:
 		/* make execvp happy. */
 		tok_val[tok_num] = NULL;
 
-		/* Check if the command is a shell built-in. */
-		{
-			command_t *func = builtin_get(builtins, tok_val[0]);
-
-			char *const *tmp1 = tok_val;
-			func(tok_num, tmp1);
-		}
+		builtin_get(builtins, tok_val[0])(tok_num, tok_val);
 	}
 }
