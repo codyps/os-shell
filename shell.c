@@ -103,10 +103,19 @@ static int cmd_default(int argc, char *const *argv)
 			}
 		}
 
-		/* TODO: check if proc exited normally */
-		printf("exit status = %d\n", status);
+		if (WIFEXITED(status)) {
+			/* exited normally */
+			printf("exit status = %d\n", WEXITSTATUS(status));
+		} else if (WIFSIGNALED(status)) {
+			/* was killed by signal */
+			printf("killed by signal %d\n", WTERMSIG(status));
+		} else if (WIFSTOPPED(status)) {
+			/* was stopped, not dead */
+			printf("stopped by signal %d\n", WSTOPSIG(status));
+		} else {
+			printf("wonky status\n");
+		}
 
-		/* TODO: check if proc recieved a signal */
 		printf("user mode time = %ld.%06ld sec\n",
 		       (long)stats.ru_utime.tv_sec, (long)stats.ru_utime.tv_usec);
 		printf("kernel mode time = %ld.%06ld sec\n",
