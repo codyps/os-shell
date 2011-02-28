@@ -19,7 +19,7 @@ rebuild: | clean
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(wildcard rsock-g*.tar) $(wildcard *.d)
+	$(RM) $(BIN) $(wildcard $(BIN)-g*.tar) $(wildcard *.d)
 
 $(BIN): $(SRC)
 	$(CC) $(CFLAGS) -o $@ $^
