@@ -4,8 +4,8 @@ BIN = msh
 CC = gcc
 RM = rm -f
 
-CFLAGS = -ggdb
-override CFLAGS+= -Wall -pipe -MMD
+CFLAGS = -ggdb -O2
+override CFLAGS += -Wall -pedantic -pipe -MMD
 
 .PHONY: all
 all: build
@@ -13,19 +13,15 @@ all: build
 .PHONY: build
 build: $(BIN)
 
-$(BIN): $(BIN).out
-#	strip -o $@ $<
-	cp $< $@
-
 .PHONY: rebuild
 rebuild: | clean
 	$(MAKE) -C . build
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(wildcard rsock-g*.tar) $(BIN).out $(wildcard *.d)
+	$(RM) $(BIN) $(wildcard rsock-g*.tar) $(wildcard *.d)
 
-$(BIN).out: $(SRC)
+$(BIN): $(SRC)
 	$(CC) $(CFLAGS) -o $@ $^
 
 .PHONY: archive
