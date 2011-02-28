@@ -88,7 +88,7 @@ static int cmd_default(int argc, char *const *argv)
 		/* child */
 		int x = execvp(argv[0], argv);
 		if (x) {
-			fprintf(stderr, "err: execvp: %s.\n", strerror(errno));
+			fprintf(stderr, "err: %s: %s.\n", argv[0], strerror(errno));
 			fflush(stderr);
 			exit(1);
 		}
