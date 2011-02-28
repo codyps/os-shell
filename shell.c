@@ -30,7 +30,9 @@ static pid_t pid;
 
 static void sig_alarm(int sig)
 {
-	kill(pid, SIGKILL);
+	if (pid) {
+		kill(pid, SIGKILL);
+	}
 }
 
 static int cmd_cd(int argc, char *const *argv)
@@ -105,6 +107,7 @@ static int cmd_default(int argc, char *const *argv)
 
 			errno = 0;
 			ret   = wait4(pid, &status, WUNTRACED, &stats);
+			alarm(0);
 
 			/* signal interrupted the wait; try again */
 			if (ret == -1 && errno == EINTR) {
