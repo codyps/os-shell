@@ -104,7 +104,7 @@ static int cmd_default(int argc, char *const *argv)
 			int ret;
 
 			errno = 0;
-			ret   = wait4(pid, &status, 0, &stats);
+			ret   = wait4(pid, &status, WUNTRACED, &stats);
 
 			/* signal interrupted the wait; try again */
 			if (ret == -1 && errno == EINTR) {
