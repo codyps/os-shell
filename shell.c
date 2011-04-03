@@ -74,10 +74,6 @@ static int cmd_exit(int argc, char *const *argv)
 		sscanf(argv[1], "%d", &ret);
 
 		/* if sscanf fails, we exit with 0 */
-		if (ret != 1) {
-			fprintf(stderr, "war: numeric argument required\n");
-			return -1;
-		}
 		exit(ret);
 	}
 	return 0;
